@@ -10,6 +10,7 @@ import DateTimePicker, {
 type PickerMode = 'date' | 'time';
 
 interface DateTimeControlProps {
+  testID?: string;
   label?: string;
   value: Date | null;                   
   mode?: PickerMode;  
@@ -18,6 +19,7 @@ interface DateTimeControlProps {
 }
 
 const DateTimeControl: React.FC<DateTimeControlProps> = ({ 
+  testID,
   label, 
   value, 
   onChange, 
@@ -46,12 +48,12 @@ const DateTimeControl: React.FC<DateTimeControlProps> = ({
 
   const openPicker = (): void => {
     if (Platform.OS === 'android') {
-      // Provera za Android API
+      
       DateTimePickerAndroid.open({
         value: value || new Date(),
         onChange: handlePickerChange,
         mode: mode,
-        is24Hour: true,
+        is24Hour: true, testID: undefined
       });
     } else {
       setShowIOS(true);
@@ -59,12 +61,12 @@ const DateTimeControl: React.FC<DateTimeControlProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={testID}>
       {label && <Text style={styles.label}>{label}</Text>}
       
       <View style={styles.pickerWrapper}>
         <Text style={styles.displayValue}>{formatDisplay()}</Text>
-        <Button title={mode === 'time' ? "Odaberi vreme" : "Odaberi datum"} onPress={openPicker} />
+        <Button  title={mode === 'time' ? "Odaberi vreme" : "Odaberi datum"} onPress={openPicker} />
       </View>
 
       {showIOS && Platform.OS === 'ios' && (
@@ -73,7 +75,8 @@ const DateTimeControl: React.FC<DateTimeControlProps> = ({
           mode={mode}
           is24Hour={true}
           display="spinner"
-          onChange={handlePickerChange}
+          onChange={handlePickerChange }
+          testID= ""
         />
       )}
     </View>

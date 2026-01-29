@@ -21,10 +21,22 @@ const validationSchema = Yup.object().shape({
 
 export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  useEffect(() => {
-    getTasks();
-  }, []);
 
+
+useEffect(() => {
+  const loadInitialTasks = async () => {
+    try {
+      const storedTasks = await getTasks();
+      if (storedTasks) {
+        setTasks(storedTasks);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  loadInitialTasks();
+}, []);
   
   const statuses: Status[] = [
     { label: 'Created', value: 'created' },
@@ -67,6 +79,7 @@ export default function Tasks() {
         {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
           <View style={styles.formWrapper}>
             <TextInput
+              testID="task-title-input"
               style={styles.inputBox}
               placeholder="Task Title"
               onChangeText={handleChange('title')}
@@ -75,14 +88,33 @@ export default function Tasks() {
             />
             {touched.title && errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
             
-            <DateTimeControl label="Time" value={values.date}  mode="date" onChange={(selectedDate) => setFieldValue('date', selectedDate)} />
+            <DateTimeControl 
+              testID="date-picker"
+              label="Date" 
+              value={values.date}  
+              mode="date" 
+              onChange={(selectedDate) => setFieldValue('date', selectedDate)} 
+            />
             {touched.date && errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
 
-            <DropdownPicker label="Status zadatka" data={statuses} value={values.status}labelField="label" valueField="value" onChange={(val) => setFieldValue('status', val)} />
+             <DropdownPicker 
+              testID="status-picker"
+              label="Status zadatka" 
+              data={statuses} 
+              value={values.status}
+              labelField="label" 
+              valueField="value" 
+              onChange={(val) => setFieldValue('status', val)} 
+            />
             {touched.status && errors.status && <Text style={styles.errorText}>{errors.status}</Text>}
        
             <View style={{ marginTop: 10 }}>
-              <Button title="Save Task" onPress={() => handleSubmit()} color="purple" />
+                          <Button 
+              testID="save-task-button"
+              title="Save Task" 
+              onPress={() => handleSubmit()} 
+              color="purple" 
+            />
             </View>
           </View>
         )}

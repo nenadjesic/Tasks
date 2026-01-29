@@ -1,31 +1,38 @@
-import 'react-native-gesture-handler'; // Prva linija!
-import React from 'react';
+import * as React from 'react';
+import { View, Text, StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar, useColorScheme, View, StyleSheet } from 'react-native';
-import AppNavigation from './src/navigation/AppNavigation';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
 
+import Home from './src/screens/Home';
+import Tasks from './src/screens/Tasks';
+
+ const isDarkMode = useColorScheme() === 'dark';
+function AppScreen() {
   return (
-    
-    <View style={styles.container}>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <AppNavigation />
-      </NavigationContainer>
-    </GestureHandlerRootView>
+      <Text>Home Screen</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1, 
-    backgroundColor: 'white', 
-  },
-});
+const Stack = createNativeStackNavigator();
 
-export default App;
+function RootStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="App" component={AppScreen} />
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Tasks" component={Tasks} />
+    </Stack.Navigator>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <RootStack />
+    </NavigationContainer>
+  );
+}

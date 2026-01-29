@@ -2,19 +2,20 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 
-// Definiramo generički interfejs za propse
+
 interface GenericDropdownProps<T> {
+  testID?: string; 
   label: string;
-  data: T[];                    // Niz bilo kojeg tipa podataka
-  value: string | null;         // Trenutno odabrana vrijednost
-  labelField: keyof T;          // Ključ iz objekta T koji će se prikazati (npr. 'label')
-  valueField: keyof T;          // Ključ iz objekta T koji služi kao ID (npr. 'value')
+  data: T[];                 
+  value: string | null;        
+  labelField: keyof T;         
+  valueField: keyof T;          
   placeholder?: string;
-  onChange: (value: string) => void; // Šaljemo nazad samo vrijednost stringu
+  onChange: (value: string) => void; 
 }
 
-// <T extends any> govori TypeScriptu da je ovo generička komponenta
 const DropdownPicker = <T extends any>({
+  testID, 
   label,
   data,
   value,
@@ -24,19 +25,19 @@ const DropdownPicker = <T extends any>({
   onChange,
 }: GenericDropdownProps<T>) => {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={testID}> 
       {label && <Text style={styles.label}>{label}</Text>}
       <Dropdown
+        // Nekatere knjižnice potrebujejo testID direktno na Dropdown komponenti
+        accessibilityLabel={testID} 
         style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
+        // ... ostali props
         data={data}
         labelField={labelField as string}
         valueField={valueField as string}
         placeholder={placeholder}
         value={value}
         onChange={(item) => {
-          // Dinamički pristupamo polju koje je definisano kao valueField
           const val = item[valueField] as unknown as string;
           onChange(val);
         }}
