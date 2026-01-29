@@ -6,7 +6,6 @@ import App from '../../App';
 
 
 export type RootStackParamList = {
-  Home: undefined;
   Tasks: undefined;
   App: undefined;
 };

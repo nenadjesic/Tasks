@@ -18,7 +18,18 @@ export const getTasks = async (): Promise<Task[]> => {
 export const saveTask = async (task: Task): Promise<{ ok: boolean }> => {
   try {
     const tasks = await getTasks();
-    const updatedTasks = [...tasks, task];
+    const newId = tasks.length > 0 
+      ? Math.max(...tasks.map((item: Task) => item.id || 0)) + 1 
+      : 1;
+
+
+    const newTask = { 
+      id: newId, 
+      title: task.title, 
+      date: task.date,
+      status: task.status 
+    };
+    const updatedTasks = [...tasks, newTask];
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTasks));
     return { ok: true };
   } catch (e) {
