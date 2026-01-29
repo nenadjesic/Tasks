@@ -7,8 +7,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from './src/screens/Home';
 import Tasks from './src/screens/Tasks';
 
- const isDarkMode = useColorScheme() === 'dark';
+ 
 function AppScreen() {
+  const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
