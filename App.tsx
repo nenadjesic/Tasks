@@ -1,39 +1,33 @@
-import * as React from 'react';
-import { View, Text, StatusBar, useColorScheme } from 'react-native';
+
+import 'react-native-gesture-handler'; // Prva linija!
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-
-import Home from './src/screens/Home';
-import Tasks from './src/screens/Tasks';
-
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StatusBar, useColorScheme, View, StyleSheet } from 'react-native';
+import AppNavigation from './src/navigation/AppNavigation';
  
-function AppScreen() {
+
+ function App() {
   const isDarkMode = useColorScheme() === 'dark';
+ 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    
+     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <Text>Home Screen</Text>
-    </View>
-  );
-}
-
-const Stack = createNativeStackNavigator();
-
-function RootStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="App" component={AppScreen} />
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="Tasks" component={Tasks} />
-    </Stack.Navigator>
-  );
-}
-
-export default function App() {
-  return (
-    <NavigationContainer>
-      <RootStack />
-    </NavigationContainer>
-  );
-}
+     <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <AppNavigation />
+      </NavigationContainer>
+    </GestureHandlerRootView>
+     </View>
+   );
+ }
+ 
+ const styles = StyleSheet.create({
+   container: {
+    flex: 1, 
+    backgroundColor: 'white', 
+   },
+ });
+ 
+ export default App;

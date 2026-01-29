@@ -11,7 +11,7 @@ jest.mock('../src//utils/storage', () => ({
 
 describe('Tasks - saveTask test', () => {
   
-  test('uspešno shrani nalogo, ko so vsa polja pravilno izpolnjena', async () => {
+  test('successfully saved the account, with all fields filled in correctly', async () => {
     render(<Tasks />);
 
     
@@ -33,7 +33,7 @@ describe('Tasks - saveTask test', () => {
 
     await waitFor(() => {
       expect(saveTask).toHaveBeenCalledWith(expect.objectContaining({
-        title: 'Moja nova dolga naloga',
+        title: 'My long tasks',
         status: 'progress',
         completed: false
       }));
@@ -41,17 +41,14 @@ describe('Tasks - saveTask test', () => {
 
 
     await waitFor(() => {
-      expect(screen.getByText('Moja nova dolga naloga')).toBeTruthy();
+      expect(screen.getByText('My new debt account')).toBeTruthy();
     });
   });
 });
 
 describe('Tasks Lifecycle', () => {
-  test('funkcija getTasks se izvede ob inicializaciji komponente', async () => {
-    // Renderiramo komponento
+  test('the getTasks function is executed when the component is initialized', async () => {
     render(<Tasks />);
-
-    // 2. Preverimo, če se je getTasks sprožil (v useEffect)
     await waitFor(() => {
       expect(getTasks).toHaveBeenCalledTimes(1);
     });

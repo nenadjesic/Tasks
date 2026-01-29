@@ -21,17 +21,15 @@ const DropdownPicker = <T extends any>({
   value,
   labelField,
   valueField,
-  placeholder = "Izaberi...",
+  placeholder = "Clean...",
   onChange,
 }: GenericDropdownProps<T>) => {
   return (
     <View style={styles.container} testID={testID}> 
       {label && <Text style={styles.label}>{label}</Text>}
       <Dropdown
-        // Nekatere knjižnice potrebujejo testID direktno na Dropdown komponenti
         accessibilityLabel={testID} 
         style={styles.dropdown}
-        // ... ostali props
         data={data}
         labelField={labelField as string}
         valueField={valueField as string}

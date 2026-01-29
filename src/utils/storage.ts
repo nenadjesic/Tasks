@@ -9,7 +9,7 @@ export const getTasks = async (): Promise<Task[]> => {
     const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
     return jsonValue != null ? JSON.parse(jsonValue) : [];
   } catch (e) {
-    console.error("Greška pri čitanju:", e);
+    console.error("Reading erro", e);
     return [];
   }
 };
@@ -22,7 +22,7 @@ export const saveTask = async (task: Task): Promise<{ ok: boolean }> => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTasks));
     return { ok: true };
   } catch (e) {
-    console.error("Greška pri čuvanju:", e);
+    console.error("Error saving", e);
     return { ok: false };
   }
 };

@@ -66,7 +66,7 @@ const DateTimeControl: React.FC<DateTimeControlProps> = ({
       
       <View style={styles.pickerWrapper}>
         <Text style={styles.displayValue}>{formatDisplay()}</Text>
-        <Button  title={mode === 'time' ? "Odaberi vreme" : "Odaberi datum"} onPress={openPicker} />
+        <Button  title={mode === 'time' ? "Choose a time" : "Choose a date"} onPress={openPicker} />
       </View>
 
       {showIOS && Platform.OS === 'ios' && (
