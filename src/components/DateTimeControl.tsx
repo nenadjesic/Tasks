@@ -6,6 +6,7 @@ import DateTimePicker, {
   DateTimePickerEvent 
 } from '@react-native-community/datetimepicker';
 
+//KOMPONENTA DATUMA - ANDROID DATUM TIP - GENERICNI TIP.
 
 type PickerMode = 'date' | 'time';
 

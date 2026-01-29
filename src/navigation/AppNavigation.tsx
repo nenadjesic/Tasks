@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Tasks from '../screens/Tasks';
 import App from '../../App';
 
-
+//NAVIGACIJA MANJEG OBIMA.
 
 export type RootStackParamList = {
   Tasks: undefined;

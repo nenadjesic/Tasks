@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react-native';
 import Tasks from '../src/screens/Tasks';
 import { saveTask, getTasks } from '../src//utils/storage';
+import { GuidGenerator } from '../src/utils/generator';
 
 
 jest.mock('../src//utils/storage', () => ({
@@ -11,7 +12,7 @@ jest.mock('../src//utils/storage', () => ({
 
 describe('Tasks - saveTask test', () => {
   
-  test('successfully saved the account, with all fields filled in correctly', async () => {
+test('successfully saved the account, with all fields filled in correctly', async () => {
     render(<Tasks />);
 
     
@@ -21,7 +22,7 @@ describe('Tasks - saveTask test', () => {
     const saveButton = screen.getByTestId('save-task-button');
 
 
-    fireEvent.changeText(titleInput, 'Moja nova dolga naloga');
+    fireEvent.changeText(titleInput, 'My Tasks for all work peoples in world...');
 
 
     fireEvent(datePicker, 'onChange', new Date('2025-01-01'));
@@ -33,8 +34,10 @@ describe('Tasks - saveTask test', () => {
 
     await waitFor(() => {
       expect(saveTask).toHaveBeenCalledWith(expect.objectContaining({
-        title: 'My long tasks',
+        id: GuidGenerator.short(),
+        title: 'My long tasks ',
         status: 'progress',
+        date: new Date('2025-01-01'),
         completed: false
       }));
     });

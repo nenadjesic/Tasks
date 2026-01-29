@@ -3,6 +3,8 @@ import { StyleSheet, View, Text } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 
 
+//DROPDOWN LISTA GENERICNOG TIPA. 
+
 interface GenericDropdownProps<T> {
   testID?: string; 
   label: string;
