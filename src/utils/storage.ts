@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Task } from "../interface/task";
+import { GuidGenerator } from "./generator";
 
 
 const STORAGE_KEY = 'tasks';
@@ -34,7 +35,7 @@ export const saveTask = async (task: Task): Promise<{ ok: boolean; data?: Task[]
     } else {
       const newTask = {
         ...task,
-        id: task.id || (tasks.length > 0 ? Math.max(...tasks.map((t: any) => Number(t.id) || 0)) + 1 : 1)
+        id: task.id || GuidGenerator.short()
       };
       updatedTasks = [...tasks, newTask];
     }
@@ -44,12 +45,4 @@ export const saveTask = async (task: Task): Promise<{ ok: boolean; data?: Task[]
   } catch (e) {
     return { ok: false };
   }
-};
-
-
-//BRISE IZBRANI ZAPIS
-export const removeTask = async (id: number): Promise<void> => {
-  const tasks = await getTasks();
-  const filteredTasks = tasks.filter(t => t.id !== id);
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(filteredTasks));
 };

@@ -20,12 +20,12 @@ interface DateTimeControlProps {
 }
 
 const DateTimeControl: React.FC<DateTimeControlProps> = ({ 
-  testID,
+  testID = new Date() ,
   label, 
   value, 
   onChange, 
   mode = 'date', 
-  placeholder = "Nije odabrano" 
+  placeholder = " " 
 }) => {
   const [showIOS, setShowIOS] = useState<boolean>(false);
 

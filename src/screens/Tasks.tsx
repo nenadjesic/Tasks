@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, Text, View, TextInput, Button, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TextInput, Button, ScrollView, TouchableOpacity, Switch, Modal } from "react-native";
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import DateTimeControl from "../components/DateTimeControl";
@@ -19,18 +19,36 @@ const validationSchema = Yup.object().shape({
 
 //SIFRANT Status-a
 const statuses: Status[] = [
-  { label: 'Created', value: 'created' },
+  { label: 'New', value: 'new' },
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'progress' },
   { label: 'Done', value: 'done' },
 ];
 
+const FloatingButtonOpen = ({ onPress }) => {
+  return (
+    <TouchableOpacity style={styles.floatingButton} onPress={onPress}>
+      <Text style={styles.floatingButtonText}>+</Text>
+    </TouchableOpacity>
+  );
+}
+
+const FloatingButtonClose = ({ onPress }) => {
+  return (
+    <TouchableOpacity style={styles.floatingButtonClose} onPress={onPress}>
+      <Text style={styles.floatingButtonTextClose}>x</Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [formVisible, setFormVisible] = useState<boolean>(false);
   const lastClick = useRef<number>(0);
   const lastId = useRef<string | null>(null);
   const formikRef = useRef<any>(null);
+  
 
   //IZVEDI NA STARTU
   useEffect(() => {
@@ -67,30 +85,26 @@ export default function Tasks() {
 
     setTasks(updatedTasks);
     await saveTask(taskData);
+    setFormVisible(false);
     resetForm();
   };
  
-  //KLIK NA BUTTON-U 
-  const removeTask = async (id: string) => {
-    const filtered = tasks.filter(t => t.id !== id);
-    setTasks(filtered);
-    // Logic for permanent deletion from storage can be added here
-    if (formikRef.current?.values.id === id) {
-        formikRef.current?.resetForm();
-    }
-  };
+
   // DVOKLIK NA IZBRANI ZAPIS KATERI GRE V EDIT
   const handleDoubleClick = (task: Task) => {
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 300;
 
     if (now - lastClick.current < DOUBLE_PRESS_DELAY && lastId.current === task.id) {
+      setFormVisible(true);
       formikRef.current?.setValues({
         id: task.id,
         title: task.title,
-        date: task.date ? new Date(task.date) : null,
+        date: task.date != null ? new Date(task.date) : new Date(),
         status: task.status
       });
+      console.log(formikRef.current);
+      setTimeout(() => formikRef.current?.setValues(task), 50);
     } else {
       lastClick.current = now;
       lastId.current = task.id || null;
@@ -100,22 +114,40 @@ export default function Tasks() {
   const filteredTasks = filterStatus === 'all' 
     ? tasks 
     : tasks.filter(t => t.status === filterStatus);
+  
+  const toggleTaskStatus = (task: Task) => {
+     task.completed = !task.completed;
+    handleSaveTask(task, { resetForm: () => {} });
+  }
+
   //FORMA UNOSA IN LIST-A
   return (
+    <>
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Task Manager</Text>
-      
+      <Modal
+          animationType="slide"
+          transparent={true}
+          visible={formVisible}
+          onRequestClose={() => {
+            setFormVisible(!formVisible);
+          }}>
+      <View style={styles.centeredView}>
+      <View style={styles.modalView}>
+        <Text style={styles.modalText}>Task</Text>
+        <FloatingButtonClose  onPress={() => setFormVisible(false) }/>
       <Formik
-        innerRef={formikRef}
-        initialValues={{ id: null, title: '', date: null, status: '' }}
+        innerRef={formikRef} 
+        enableReinitialize={true}
+        initialValues={{ id: null, title: '', date: null, status: statuses[0].value }}
         validationSchema={validationSchema}
         onSubmit={handleSaveTask}
       >
         {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
           <View style={styles.formWrapper}>
             <TextInput
+              testID="task-title-input"
               style={styles.inputBox}
-              placeholder="Task Title"
+              placeholder=""
               onChangeText={handleChange('title')}
               onBlur={handleBlur('title')}
               value={values.title}
@@ -123,6 +155,7 @@ export default function Tasks() {
             {touched.title && errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
 
             <DateTimeControl
+              testID="date-picker"
               label="Date"
               value={values.date}
               mode="date"
@@ -131,7 +164,8 @@ export default function Tasks() {
             {touched.date && errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
 
             <DropdownPicker
-              label="Task Status"
+              testID="status-picker"
+              label="Status"
               data={statuses}
               value={values.status}
               labelField="label"
@@ -140,8 +174,9 @@ export default function Tasks() {
             />
             {touched.status && errors.status && <Text style={styles.errorText}>{errors.status}</Text>}
 
-            <View style={{ marginTop: 15 }}>
+            <View>
               <Button 
+                testID="save-task-button"
                 title={values.id ? "Update Task" : "Save Task"} 
                 onPress={() => handleSubmit()} 
                 color={values.id ? "#28a745" : "purple"} 
@@ -150,7 +185,9 @@ export default function Tasks() {
           </View>
         )}
       </Formik>
-
+       </View>
+          </View>
+        </Modal>
       <Text style={styles.subtitle}>Filter by Status:</Text>
       <View style={styles.filterContainer}>
         {['all', ...statuses.map(s => s.value)].map((status) => (
@@ -184,21 +221,21 @@ export default function Tasks() {
               </View>
             </View>
           </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => task.id && removeTask(task.id)} style={styles.deleteBtn}>
-            <Text style={styles.deleteIcon}>✕</Text>
-          </TouchableOpacity>
+           <Switch value={task.completed} onValueChange={() => toggleTaskStatus(task) } />         
         </View>
       ))}
     </ScrollView>
+    <FloatingButtonOpen onPress={() => setFormVisible(true) }/>
+
+    </>
   );
 }
 // STILIZIRNJE
 const styles = StyleSheet.create({
   container: { padding: 25, backgroundColor: '#fff' },
   title: { fontSize: 28, fontWeight: "bold", textAlign: 'center', marginBottom: 20 },
-  formWrapper: { marginBottom: 30, backgroundColor: '#f9f9f9', padding: 15, borderRadius: 10, elevation: 1 },
-  inputBox: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 5, marginBottom: 5, backgroundColor: '#fff' },
+  formWrapper: { width: '95%', marginBottom: 30, backgroundColor: '#f9f9f9', padding: 5, borderRadius: 10, elevation: 1 },
+  inputBox: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 15, marginBottom: 5, backgroundColor: '#fff' },
   subtitle: { fontSize: 16, fontWeight: "bold", marginBottom: 10, color: '#333' },
   errorText: { color: 'red', fontSize: 12, marginBottom: 10 },
   filterContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
@@ -218,4 +255,65 @@ const styles = StyleSheet.create({
   done: { backgroundColor: '#E3F9E5' },
   deleteBtn: { backgroundColor: '#FFE5E5', width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
   deleteIcon: { color: '#FF3B30', fontSize: 14, fontWeight: 'bold' },
+  
+  floatingButton: {
+    backgroundColor: '#128049', 
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    bottom: 40,
+    right: 30,
+    elevation: 5,
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+    floatingButtonClose: {
+    backgroundColor: '#e41b1b', 
+    width: 30,
+    height: 30,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    top: 20,
+    right: 20,
+    elevation: 5,
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  floatingButtonText: { color: '#FFFFFF', fontSize: 32, fontWeight: 'bold' },
+  floatingButtonTextClose: { color: '#FFFFFF', fontSize: 20, fontWeight: 'bold' },
+    centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  modalView: {
+    width: '90%',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
 });

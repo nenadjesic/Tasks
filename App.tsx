@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
   },
   toggleBtn: {
     position: 'absolute',
-    top: 50,
+    top: 35,
     right: 20,
     zIndex: 9999,
     padding: 10,
