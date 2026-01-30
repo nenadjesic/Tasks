@@ -68,7 +68,7 @@ export default function Tasks() {
     const taskData: Task = {
       id: values.id || GuidGenerator.short(),
       title: values.title,
-      completed: values.status === 'done',
+      completed: values.completed,
       date: values.date,
       status: values.status
     };
