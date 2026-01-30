@@ -10,7 +10,7 @@ import { getTasks, saveTask } from "../utils/storage";
 import { GuidGenerator } from "../utils/generator";
 
 
-//VALIDACIJA 
+//VALIDACIJA
 const validationSchema = Yup.object().shape({
   title: Yup.string().required("Title is required.").min(10, "Title is too short."),
   date: Yup.date().required("Date is required.").nullable(),
@@ -48,7 +48,7 @@ export default function Tasks() {
   const lastClick = useRef<number>(0);
   const lastId = useRef<string | null>(null);
   const formikRef = useRef<any>(null);
-  
+
 
   //IZVEDI NA STARTU
   useEffect(() => {
@@ -66,9 +66,9 @@ export default function Tasks() {
   //DOGODEK SAVE
   const handleSaveTask = async (values: any, { resetForm }: any) => {
     const taskData: Task = {
-      id: values.id || GuidGenerator.short(), 
+      id: values.id || GuidGenerator.short(),
       title: values.title,
-      completed: values.completed,
+      completed: values.status === 'done',
       date: values.date,
       status: values.status
     };
@@ -88,20 +88,22 @@ export default function Tasks() {
     setFormVisible(false);
     resetForm();
   };
- 
+
 
   // DVOKLIK NA IZBRANI ZAPIS KATERI GRE V EDIT
   const handleDoubleClick = (task: Task) => {
-    setFormVisible(true);
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 300;
-    formikRef.current?.setValues({
+
+    if (now - lastClick.current < DOUBLE_PRESS_DELAY && lastId.current === task.id) {
+      setFormVisible(true);
+      formikRef.current?.setValues({
         id: task.id,
         title: task.title,
-        date: task.date != null ? new Date(task.date) : new Date(),
+        date: task.date ? new Date(task.date) :null,
         status: task.status
       });
-    if (now - lastClick.current < DOUBLE_PRESS_DELAY && lastId.current === task.id) {
+      console.log(formikRef.current);
       setTimeout(() => formikRef.current?.setValues(task), 50);
     } else {
       lastClick.current = now;
@@ -109,10 +111,10 @@ export default function Tasks() {
     }
   };
 
-  const filteredTasks = filterStatus === 'all' 
-    ? tasks 
+  const filteredTasks = filterStatus === 'all'
+    ? tasks
     : tasks.filter(t => t.status === filterStatus);
-  
+
   const toggleTaskStatus = (task: Task) => {
      task.completed = !task.completed;
     handleSaveTask(task, { resetForm: () => {} });
@@ -134,54 +136,60 @@ export default function Tasks() {
         <Text style={styles.modalText}>Task</Text>
         <FloatingButtonClose  onPress={() => setFormVisible(false) }/>
       <Formik
-        innerRef={formikRef} 
+        innerRef={formikRef}
         enableReinitialize={true}
         initialValues={{ id: null, title: '', date: null, status: statuses[0].value }}
         validationSchema={validationSchema}
         onSubmit={handleSaveTask}
       >
-        {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => (
-          <View style={styles.formWrapper}>
-            <TextInput
-              testID="task-title-input"
-              style={styles.inputBox}
-              placeholder=""
-              onChangeText={handleChange('title')}
-              onBlur={handleBlur('title')}
-              value={values.title}
-            />
-            {touched.title && errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
+        {({ handleChange, handleBlur, handleSubmit, setFieldValue, values, errors, touched }) => {
+          if (values?.date) {
+            values.date = new Date(values.date);
+          }
 
-            <DateTimeControl
-              testID="date-picker"
-              label="Date"
-              value={values.date}
-              mode="date"
-              onChange={(selectedDate) => setFieldValue('date', selectedDate)}
-            />
-            {touched.date && errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
-
-            <DropdownPicker
-              testID="status-picker"
-              label="Status"
-              data={statuses}
-              value={values.status}
-              labelField="label"
-              valueField="value"
-              onChange={(val) => setFieldValue('status', val)}
-            />
-            {touched.status && errors.status && <Text style={styles.errorText}>{errors.status}</Text>}
-
-            <View>
-              <Button 
-                testID="save-task-button"
-                title={values.id ? "Update Task" : "Save Task"} 
-                onPress={() => handleSubmit()} 
-                color={values.id ? "#28a745" : "purple"} 
+          return (
+            <View style={styles.formWrapper}>
+              <TextInput
+                testID="task-title-input"
+                style={styles.inputBox}
+                placeholder=""
+                onChangeText={handleChange('title')}
+                onBlur={handleBlur('title')}
+                value={values.title}
               />
-            </View>
-          </View>
-        )}
+              {touched.title && errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
+
+              <DateTimeControl
+                testID="date-picker"
+                label="Date"
+                value={values.date}
+                mode="date"
+                onChange={(selectedDate) => setFieldValue('date', selectedDate)}
+              />
+              {touched.date && errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
+
+              <DropdownPicker
+                testID="status-picker"
+                label="Status"
+                data={statuses}
+                value={values.status}
+                labelField="label"
+                valueField="value"
+                onChange={(val) => setFieldValue('status', val)}
+              />
+              {touched.status && errors.status && <Text style={styles.errorText}>{errors.status}</Text>}
+
+              <View>
+                <Button
+                  testID="save-task-button"
+                  title={values.id ? "Update Task" : "Save Task"}
+                  onPress={() => handleSubmit()}
+                  color={values.id ? "#28a745" : "purple"}
+                />
+              </View>
+            </View>);
+          }
+        }
       </Formik>
        </View>
           </View>
@@ -189,8 +197,8 @@ export default function Tasks() {
       <Text style={styles.subtitle}>Filter by Status:</Text>
       <View style={styles.filterContainer}>
         {['all', ...statuses.map(s => s.value)].map((status) => (
-          <TouchableOpacity 
-            key={status} 
+          <TouchableOpacity
+            key={status}
             style={[styles.filterBtn, filterStatus === status && styles.filterBtnActive]}
             onPress={() => setFilterStatus(status)}
           >
@@ -219,7 +227,7 @@ export default function Tasks() {
               </View>
             </View>
           </TouchableOpacity>
-           <Switch value={task.completed} onValueChange={() => toggleTaskStatus(task) } />         
+           <Switch value={task.completed} onValueChange={() => toggleTaskStatus(task) } />
         </View>
       ))}
     </ScrollView>
@@ -232,7 +240,7 @@ export default function Tasks() {
 const styles = StyleSheet.create({
   container: { padding: 25, backgroundColor: '#fff' },
   title: { fontSize: 28, fontWeight: "bold", textAlign: 'center', marginBottom: 20 },
-  formWrapper: { width: '95%', marginBottom: 30, backgroundColor: '#f9f9f9', padding: 5, borderRadius: 10, elevation: 1 },
+  formWrapper: { width: '95%', marginBottom: 30, padding: 5 },
   inputBox: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 15, marginBottom: 5, backgroundColor: '#fff' },
   subtitle: { fontSize: 16, fontWeight: "bold", marginBottom: 10, color: '#333' },
   errorText: { color: 'red', fontSize: 12, marginBottom: 10 },
@@ -253,9 +261,9 @@ const styles = StyleSheet.create({
   done: { backgroundColor: '#E3F9E5' },
   deleteBtn: { backgroundColor: '#FFE5E5', width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
   deleteIcon: { color: '#FF3B30', fontSize: 14, fontWeight: 'bold' },
-  
+
   floatingButton: {
-    backgroundColor: '#128049', 
+    backgroundColor: '#128049',
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -265,13 +273,13 @@ const styles = StyleSheet.create({
     bottom: 40,
     right: 30,
     elevation: 5,
-    shadowColor: "#000", 
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
     floatingButtonClose: {
-    backgroundColor: '#e41b1b', 
+    backgroundColor: '#e41b1b',
     width: 30,
     height: 30,
     borderRadius: 30,
@@ -281,7 +289,7 @@ const styles = StyleSheet.create({
     top: 20,
     right: 20,
     elevation: 5,
-    shadowColor: "#000", 
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -293,7 +301,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
   modalView: {
     width: '90%',
     margin: 20,
