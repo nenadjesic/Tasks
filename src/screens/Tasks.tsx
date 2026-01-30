@@ -68,7 +68,7 @@ export default function Tasks() {
     const taskData: Task = {
       id: values.id || GuidGenerator.short(), 
       title: values.title,
-      completed: values.status === 'done',
+      completed: values.completed,
       date: values.date,
       status: values.status
     };
@@ -92,18 +92,16 @@ export default function Tasks() {
 
   // DVOKLIK NA IZBRANI ZAPIS KATERI GRE V EDIT
   const handleDoubleClick = (task: Task) => {
+    setFormVisible(true);
     const now = Date.now();
     const DOUBLE_PRESS_DELAY = 300;
-
-    if (now - lastClick.current < DOUBLE_PRESS_DELAY && lastId.current === task.id) {
-      setFormVisible(true);
-      formikRef.current?.setValues({
+    formikRef.current?.setValues({
         id: task.id,
         title: task.title,
         date: task.date != null ? new Date(task.date) : new Date(),
         status: task.status
       });
-      console.log(formikRef.current);
+    if (now - lastClick.current < DOUBLE_PRESS_DELAY && lastId.current === task.id) {
       setTimeout(() => formikRef.current?.setValues(task), 50);
     } else {
       lastClick.current = now;
